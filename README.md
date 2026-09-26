@@ -28,8 +28,9 @@ The **LEA Campus Tracker & Ambassador Ops Dashboard** is designed to streamline 
 
 ## 🛠️ Quick Start
 
-### Option 1: Standalone Static Dashboard
-You can open `index.html` directly in any web browser, or host via GitHub Pages without setting up a backend.
+### Option 1: Standalone Static Dashboard (GitHub Pages)
+- **Live Site**: [https://namikup.github.io/LEA-website/](https://namikup.github.io/LEA-website/)
+- Or open `index.html` directly in any web browser. When hosted on GitHub Pages, it connects seamlessly to the cloud Render backend (`https://lea-website.onrender.com/api`) with fallback to local storage.
 
 ### Option 2: Full-Stack with Backend API
 1. Install dependencies:
@@ -43,6 +44,9 @@ You can open `index.html` directly in any web browser, or host via GitHub Pages 
    ```
 
 3. Open your browser at `http://localhost:3000`.
+
+### Option 3: Live Cloud Deployment
+- **Production URL**: [https://lea-website.onrender.com](https://lea-website.onrender.com)
 
 ---
 

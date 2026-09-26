@@ -54,6 +54,9 @@
             <div class="flex items-center space-x-2">
               <h1 class="font-bold text-slate-900 tracking-tight text-lg">LEA Ambassador Hub</h1>
               <span class="text-xs font-semibold px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full">UUM Chapter</span>
+              <span id="backend-status-badge" class="text-xs font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Connecting...
+              </span>
             </div>
             <p class="text-xs text-slate-500">Campus Partnership & Recruitment Operations</p>
           </div>
@@ -500,6 +503,11 @@
       { id: 'l-6', name: 'Lucas Wong', demo: 'Chinese', faculty: 'SBM', inasis: 'Proton', source: 'Instagram DM', status: 'Joined LEA', contact: '@lucas_wong99' }
     ];
 
+    // API endpoint configuration
+    const API_URL = (window.location.hostname === 'lea-website.onrender.com')
+      ? '/api'
+      : 'https://lea-website.onrender.com/api';
+
     // Local Storage keys
     const STORAGE_KEY_PARTNERS = 'lea_uum_ambassador_partners_v2';
     const STORAGE_KEY_LEADS = 'lea_uum_ambassador_leads_v2';
@@ -510,8 +518,62 @@
     let currentPartnerFilter = 'all';
     let currentLeadFilter = 'all';
     let searchQuery = '';
+    let isBackendConnected = false;
 
-    function initApp() {
+    function updateBackendStatusBadge(connected) {
+      const badge = document.getElementById('backend-status-badge');
+      if (!badge) return;
+      if (connected) {
+        badge.className = 'text-xs font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Render API Connected';
+        badge.title = 'Live sync active with https://lea-website.onrender.com';
+      } else {
+        badge.className = 'text-xs font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> LocalStorage Mode';
+        badge.title = 'Offline mode (saving to browser localStorage)';
+      }
+    }
+
+    async function checkBackendConnection() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(`${API_URL}/stats`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          isBackendConnected = true;
+          updateBackendStatusBadge(true);
+          return true;
+        }
+      } catch (e) {
+        // Backend not reachable
+      }
+      isBackendConnected = false;
+      updateBackendStatusBadge(false);
+      return false;
+    }
+
+    async function initApp() {
+      const online = await checkBackendConnection();
+      if (online) {
+        try {
+          const [partnersRes, recruitsRes] = await Promise.all([
+            fetch(`${API_URL}/partners`),
+            fetch(`${API_URL}/recruits`)
+          ]);
+          if (partnersRes.ok && recruitsRes.ok) {
+            partners = await partnersRes.json();
+            leads = await recruitsRes.json();
+            saveToStorage();
+            renderAll();
+            return;
+          }
+        } catch (err) {
+          console.warn('API error during initialization, falling back to localStorage:', err);
+        }
+      }
+
+      // Standalone or offline fallback
       const storedPartners = localStorage.getItem(STORAGE_KEY_PARTNERS);
       const storedLeads = localStorage.getItem(STORAGE_KEY_LEADS);
 
@@ -523,13 +585,35 @@
     }
 
     function saveToStorage() {
-      localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(partners));
-      localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
+      try {
+        localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(partners));
+        localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
+      } catch (e) {
+        console.warn('LocalStorage quota or access restriction:', e);
+      }
     }
 
-    function resetDataPrompt() {
-      // Use clean non-native confirmation style via small confirm check
+    async function resetDataPrompt() {
       if (window.confirm("Restore default preset UUM clubs and mock leads? All your custom changes will be reset.")) {
+        if (isBackendConnected) {
+          try {
+            await fetch(`${API_URL}/reset`, { method: 'POST' });
+            const [pRes, rRes] = await Promise.all([
+              fetch(`${API_URL}/partners`),
+              fetch(`${API_URL}/recruits`)
+            ]);
+            if (pRes.ok && rRes.ok) {
+              partners = await pRes.json();
+              leads = await rRes.json();
+              saveToStorage();
+              renderAll();
+              showToast("Presets restored to SQLite database!", "info");
+              return;
+            }
+          } catch (err) {
+            console.warn('Backend reset failed, using local reset:', err);
+          }
+        }
         partners = [...DEFAULT_PARTNERS];
         leads = [...DEFAULT_LEADS];
         saveToStorage();
@@ -793,7 +877,7 @@
     }
 
     function editPartner(id) {
-      const p = partners.find(item => item.id === id);
+      const p = partners.find(item => String(item.id) === String(id));
       if (!p) return;
       document.getElementById('partner-id').value = p.id;
       document.getElementById('partner-name').value = p.name;
@@ -805,7 +889,7 @@
       document.getElementById('modal-partner').classList.remove('hidden');
     }
 
-    function savePartner(e) {
+    async function savePartner(e) {
       e.preventDefault();
       const id = document.getElementById('partner-id').value;
       const name = document.getElementById('partner-name').value.trim();
@@ -813,18 +897,45 @@
       const stage = document.getElementById('partner-stage').value;
       const pic = document.getElementById('partner-pic').value.trim();
       const notes = document.getElementById('partner-notes').value.trim();
+      const booth_status = stage === 'Secured Free Booth' ? 'Secured' : (stage === 'Negotiating Booth' ? 'Negotiating' : 'Pending');
 
       if (id) {
-        const index = partners.findIndex(item => item.id === id);
+        const index = partners.findIndex(item => String(item.id) === String(id));
         if (index !== -1) {
-          partners[index] = { ...partners[index], name, category, stage, pic, notes };
+          partners[index] = { ...partners[index], name, category, stage, pic, notes, booth_status };
           showToast(`Updated "${name}"`, 'success');
         }
+        if (isBackendConnected) {
+          try {
+            await fetch(`${API_URL}/partners/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
+            });
+          } catch (err) {
+            console.warn('API error updating partner:', err);
+          }
+        }
       } else {
-        const newPartner = {
+        let newPartner = {
           id: 'p-' + Date.now(),
-          name, category, stage, pic, notes
+          name, category, stage, pic, notes, booth_status
         };
+        if (isBackendConnected) {
+          try {
+            const res = await fetch(`${API_URL}/partners`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
+            });
+            if (res.ok) {
+              const created = await res.json();
+              newPartner.id = created.id;
+            }
+          } catch (err) {
+            console.warn('API error adding partner:', err);
+          }
+        }
         partners.unshift(newPartner);
         showToast(`Added "${name}" to pipeline`, 'success');
       }
@@ -834,22 +945,43 @@
       renderAll();
     }
 
-    function updatePartnerStage(id, newStage) {
-      const p = partners.find(item => item.id === id);
+    async function updatePartnerStage(id, newStage) {
+      const p = partners.find(item => String(item.id) === String(id));
       if (p) {
         p.stage = newStage;
+        p.booth_status = newStage === 'Secured Free Booth' ? 'Secured' : (newStage === 'Negotiating Booth' ? 'Negotiating' : 'Pending');
         saveToStorage();
         updateKPIs();
         renderPartners();
         showToast(`Moved ${p.name} to ${newStage}`, 'info');
+
+        if (isBackendConnected) {
+          try {
+            await fetch(`${API_URL}/partners/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ stage: newStage, status: newStage, booth_status: p.booth_status })
+            });
+          } catch (err) {
+            console.warn('API error updating partner stage:', err);
+          }
+        }
       }
     }
 
-    function deletePartner(id) {
-      partners = partners.filter(item => item.id !== id);
+    async function deletePartner(id) {
+      partners = partners.filter(item => String(item.id) !== String(id));
       saveToStorage();
       renderAll();
       showToast('Organization removed', 'info');
+
+      if (isBackendConnected) {
+        try {
+          await fetch(`${API_URL}/partners/${id}`, { method: 'DELETE' });
+        } catch (err) {
+          console.warn('API error deleting partner:', err);
+        }
+      }
     }
 
     function openLeadModal() {
@@ -864,7 +996,7 @@
     }
 
     function editLead(id) {
-      const lead = leads.find(l => l.id === id);
+      const lead = leads.find(l => String(l.id) === String(id));
       if (!lead) return;
       document.getElementById('lead-id').value = lead.id;
       document.getElementById('lead-name').value = lead.name;
@@ -878,7 +1010,7 @@
       document.getElementById('modal-lead').classList.remove('hidden');
     }
 
-    function saveLead(e) {
+    async function saveLead(e) {
       e.preventDefault();
       const id = document.getElementById('lead-id').value;
       const name = document.getElementById('lead-name').value.trim();
@@ -890,16 +1022,42 @@
       const contact = document.getElementById('lead-contact').value.trim();
 
       if (id) {
-        const index = leads.findIndex(l => l.id === id);
+        const index = leads.findIndex(l => String(l.id) === String(id));
         if (index !== -1) {
           leads[index] = { ...leads[index], name, demo, status, faculty, inasis, source, contact };
           showToast(`Updated ${name}`, 'success');
         }
+        if (isBackendConnected) {
+          try {
+            await fetch(`${API_URL}/recruits/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
+            });
+          } catch (err) {
+            console.warn('API error updating recruit:', err);
+          }
+        }
       } else {
-        const newLead = {
+        let newLead = {
           id: 'l-' + Date.now(),
           name, demo, status, faculty, inasis, source, contact
         };
+        if (isBackendConnected) {
+          try {
+            const res = await fetch(`${API_URL}/recruits`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
+            });
+            if (res.ok) {
+              const created = await res.json();
+              newLead.id = created.id;
+            }
+          } catch (err) {
+            console.warn('API error adding recruit:', err);
+          }
+        }
         leads.unshift(newLead);
         showToast(`Added ${name} to tracker`, 'success');
       }
@@ -909,22 +1067,42 @@
       renderAll();
     }
 
-    function updateLeadStatus(id, newStatus) {
-      const l = leads.find(item => item.id === id);
+    async function updateLeadStatus(id, newStatus) {
+      const l = leads.find(item => String(item.id) === String(id));
       if (l) {
         l.status = newStatus;
         saveToStorage();
         updateKPIs();
         renderLeads();
         showToast(`${l.name} marked as ${newStatus}`, 'info');
+
+        if (isBackendConnected) {
+          try {
+            await fetch(`${API_URL}/recruits/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus, stage: newStatus })
+            });
+          } catch (err) {
+            console.warn('API error updating recruit status:', err);
+          }
+        }
       }
     }
 
-    function deleteLead(id) {
-      leads = leads.filter(item => item.id !== id);
+    async function deleteLead(id) {
+      leads = leads.filter(item => String(item.id) !== String(id));
       saveToStorage();
       renderAll();
       showToast('Student lead removed', 'info');
+
+      if (isBackendConnected) {
+        try {
+          await fetch(`${API_URL}/recruits/${id}`, { method: 'DELETE' });
+        } catch (err) {
+          console.warn('API error deleting recruit:', err);
+        }
+      }
     }
 
     const SCRIPTS = {
