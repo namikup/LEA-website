@@ -42,7 +42,7 @@ You can open `index.html` directly in any web browser, or host via GitHub Pages 
    npm start
    ```
 
-3. Open your browser at `http://localhost:5000`.
+3. Open your browser at `http://localhost:3000`.
 
 ---
 
