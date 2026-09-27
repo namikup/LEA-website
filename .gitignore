@@ -5,3 +5,4 @@ ambassador.db
 .env
 .env.*
 *.env
+!.env.example

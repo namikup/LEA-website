@@ -162,8 +162,8 @@ function seedRecruits() {
 // AUTHENTICATION ROUTES
 // ==========================================
 const VALID_CREDENTIALS = [
-    { username: 'admin', password: process.env.ADMIN_PASSWORD || 'leauum2025', role: 'Lead Ambassador' },
-    { username: 'ambassador', password: process.env.AMBASSADOR_PASSWORD || 'leauum2025', role: 'Campus Ambassador' }
+    { username: process.env.ADMIN_USERNAME || 'admin', password: process.env.ADMIN_PASSWORD || 'leauum2025', role: 'Lead Ambassador' },
+    { username: process.env.AMBASSADOR_USERNAME || 'ambassador', password: process.env.AMBASSADOR_PASSWORD || 'leauum2025', role: 'Campus Ambassador' }
 ];
 
 // Authenticate ambassador login
