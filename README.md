@@ -123,9 +123,11 @@ The dashboard comes pre-seeded with real UUM entities and organizations:
    ```
 
 5. **Sign In**:
-   Use the default ambassador access credentials:
-   - **Username**: `admin` *(or `ambassador`)*
-   - **Password**: `leauum2025`
+   Copy `.env.example` to `.env` and set your credentials:
+   ```bash
+   cp .env.example .env
+   ```
+   Sign in using the `ADMIN_USERNAME` and `ADMIN_PASSWORD` configured in your `.env` file (e.g. `admin`).
 
 > **Note**: For development with automatic server restarts upon file changes, run:
 > ```bash
@@ -134,14 +136,21 @@ The dashboard comes pre-seeded with real UUM entities and organizations:
 
 ---
 
-## 🔐 Default Access Credentials
+## 🔐 Authentication & Environment Configuration
 
-The portal is protected by an ambassador authorization gate with session persistence:
+The dashboard uses server-side authentication. Passwords are **never stored in the frontend codebase** or committed to GitHub:
 
-| Role | Username | Default Password | Environment Variable |
+| Role | Username Variable | Password Variable | Description |
 | :--- | :--- | :--- | :--- |
-| **Lead Ambassador / Admin** | `admin` | `leauum2025` | `ADMIN_PASSWORD` |
-| **Campus Ambassador** | `ambassador` | `leauum2025` | `AMBASSADOR_PASSWORD` |
+| **Lead Ambassador / Admin** | `ADMIN_USERNAME` (default: `admin`) | `ADMIN_PASSWORD` | Full access to pipeline and stats |
+| **Campus Ambassador** | `AMBASSADOR_USERNAME` (default: `ambassador`) | `AMBASSADOR_PASSWORD` | Outreach and recruit tracking |
+
+### Setting Passwords on Render:
+1. Go to your [Render Dashboard](https://dashboard.render.com).
+2. Select your `lea-website` service.
+3. Click **Environment** in the left sidebar.
+4. Add `ADMIN_PASSWORD` with your private secret password.
+5. Save changes — Render will automatically re-deploy securely.
 
 ---
 

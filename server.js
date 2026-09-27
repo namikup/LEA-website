@@ -2,6 +2,20 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
+
+// Load environment variables from local .env file if it exists
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+    const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+    envLines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+            const [k, ...v] = trimmed.split('=');
+            if (k && v.length) process.env[k.trim()] = v.join('=').trim();
+        }
+    });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -113,10 +113,10 @@
           <span>Sign In to Dashboard</span>
         </button>
 
-        <!-- Preset helper badge / quick fill -->
-        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Preset Access: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700 font-bold">admin</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700 font-bold">leauum2025</code></span>
-          <button type="button" onclick="fillDemoCredentials()" class="text-brand-600 hover:text-brand-700 font-semibold hover:underline cursor-pointer">Quick Fill</button>
+        <!-- Security notice -->
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved text-emerald-500"></i> Server-authenticated session</span>
+          <span class="text-slate-400">UUM Ambassador Portal</span>
         </div>
       </form>
     </div>
@@ -1325,10 +1325,10 @@
       let authenticated = false;
       let role = 'Ambassador Admin';
 
-      // 1. Try Backend API
+      // Send authentication request strictly to server API
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1336,6 +1336,7 @@
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
@@ -1347,18 +1348,17 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
           return;
+        } else {
+          showAuthError("Authentication service error. Please try again shortly.");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
+          return;
         }
       } catch (err) {
-        // Backend offline / sleeping - fallback to client verification
-      }
-
-      // 2. Client-side fallback authentication
-      if (!authenticated) {
-        const validUsers = ['admin', 'ambassador', 'lea'];
-        const validPasswords = ['leauum2025', 'admin123', 'lea2025'];
-        if (validUsers.includes(username.toLowerCase()) && validPasswords.includes(password)) {
-          authenticated = true;
-        }
+        showAuthError("Unable to reach authentication server. If the cloud service is waking up, please retry in a few seconds.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
+        return;
       }
 
       submitBtn.disabled = false;
@@ -1379,7 +1379,7 @@
         initApp();
         showToast(`Welcome back, ${username}!`, 'success');
       } else {
-        showAuthError("Invalid username or password. Check default access credentials below.");
+        showAuthError("Invalid username or password.");
       }
     }
 
@@ -1405,12 +1405,6 @@
         icon.classList.remove('fa-eye-slash');
         icon.classList.add('fa-eye');
       }
-    }
-
-    function fillDemoCredentials() {
-      document.getElementById('auth-username').value = 'admin';
-      document.getElementById('auth-password').value = 'leauum2025';
-      document.getElementById('auth-error-alert').classList.add('hidden');
     }
 
     function handleLogout() {
