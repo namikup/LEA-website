@@ -39,9 +39,88 @@
       background-color: #cbd5e1;
       border-radius: 9999px;
     }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Authentication Gate Overlay -->
+  <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity duration-300">
+    <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden transform transition-all">
+      <!-- Header banner -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-850 to-brand-900 p-6 text-white text-center relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-brand-500/20 rounded-full blur-2xl"></div>
+        
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-brand-500 to-amber-400 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+          <i class="fa-solid fa-graduation-cap text-2xl"></i>
+        </div>
+        <h2 class="text-xl font-bold tracking-tight">LEA Ambassador Hub</h2>
+        <p class="text-xs text-slate-300 mt-1">UUM Chapter Operations & Recruitment</p>
+        <div class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-orange-200 border border-white/10">
+          <i class="fa-solid fa-lock text-[10px]"></i> Authorized Ambassador Access Only
+        </div>
+      </div>
+
+      <!-- Form body -->
+      <form id="auth-form" onsubmit="handleLogin(event)" class="p-6 space-y-4">
+        <div id="auth-error-alert" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-shake">
+          <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+          <span id="auth-error-text">Invalid username or password.</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ambassador Username</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-user text-xs"></i>
+            </div>
+            <input type="text" id="auth-username" required placeholder="Enter username (e.g. admin)" autocomplete="username"
+              class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-hidden transition-all">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-key text-xs"></i>
+            </div>
+            <input type="password" id="auth-password" required placeholder="Enter password" autocomplete="current-password"
+              class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-hidden transition-all">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 text-xs">
+              <i id="password-toggle-icon" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600">
+            <input type="checkbox" id="auth-remember-me" checked class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300">
+            <span>Remember me on this device</span>
+          </label>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-600 to-orange-500 hover:from-brand-700 hover:to-orange-600 text-white font-semibold text-xs rounded-xl shadow-md shadow-orange-600/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Sign In to Dashboard</span>
+        </button>
+
+        <!-- Preset helper badge / quick fill -->
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <span>Preset Access: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700 font-bold">admin</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700 font-bold">leauum2025</code></span>
+          <button type="button" onclick="fillDemoCredentials()" class="text-brand-600 hover:text-brand-700 font-semibold hover:underline cursor-pointer">Quick Fill</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,6 +155,19 @@
             <i class="fa-solid fa-handshake"></i>
             <span>Add Partner / Club</span>
           </button>
+
+          <!-- Auth User Info & Logout -->
+          <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+          <div class="flex items-center space-x-2">
+            <span id="auth-user-badge" class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-slate-100 text-slate-700 rounded-lg border border-slate-200">
+              <i class="fa-solid fa-user-shield text-brand-600"></i>
+              <span id="auth-user-name">admin</span>
+            </span>
+            <button onclick="handleLogout()" title="Sign out" class="px-2.5 py-2 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1.5 border border-slate-200 hover:border-rose-200 cursor-pointer">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span class="hidden sm:inline">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1156,9 +1248,188 @@
       }, 2500);
     }
 
-    // Initialize on window load
+    // ==========================================
+    // AUTHENTICATION & SESSION MANAGEMENT
+    // ==========================================
+    const AUTH_STORAGE_KEY = 'lea_ambassador_auth_session';
+
+    function checkAuthSession() {
+      const session = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
+      if (session) {
+        try {
+          const authData = JSON.parse(session);
+          if (authData && authData.username) {
+            showDashboard(authData.username);
+            initApp();
+            return;
+          }
+        } catch (e) {
+          console.warn('Invalid auth session, clearing:', e);
+          clearAuthSession();
+        }
+      }
+      showLoginModal();
+    }
+
+    function showLoginModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+      });
+      setTimeout(() => {
+        const userInput = document.getElementById('auth-username');
+        if (userInput) userInput.focus();
+      }, 100);
+    }
+
+    function hideLoginModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function showDashboard(username) {
+      hideLoginModal();
+      const badge = document.getElementById('auth-user-badge');
+      const nameEl = document.getElementById('auth-user-name');
+      if (badge && nameEl) {
+        nameEl.textContent = username;
+        badge.classList.remove('hidden');
+        badge.classList.add('inline-flex');
+      }
+    }
+
+    function clearAuthSession() {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('auth-username');
+      const passwordInput = document.getElementById('auth-password');
+      const rememberMe = document.getElementById('auth-remember-me').checked;
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const errorAlert = document.getElementById('auth-error-alert');
+
+      errorAlert.classList.add('hidden');
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Verifying...</span>';
+
+      let authenticated = false;
+      let role = 'Ambassador Admin';
+
+      // 1. Try Backend API
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            authenticated = true;
+            role = data.user?.role || role;
+          }
+        } else if (res.status === 401) {
+          showAuthError("Invalid username or password. Please try again.");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
+          return;
+        }
+      } catch (err) {
+        // Backend offline / sleeping - fallback to client verification
+      }
+
+      // 2. Client-side fallback authentication
+      if (!authenticated) {
+        const validUsers = ['admin', 'ambassador', 'lea'];
+        const validPasswords = ['leauum2025', 'admin123', 'lea2025'];
+        if (validUsers.includes(username.toLowerCase()) && validPasswords.includes(password)) {
+          authenticated = true;
+        }
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
+
+      if (authenticated) {
+        const authPayload = {
+          username,
+          role,
+          loginAt: new Date().toISOString()
+        };
+        if (rememberMe) {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authPayload));
+        } else {
+          sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authPayload));
+        }
+        showDashboard(username);
+        initApp();
+        showToast(`Welcome back, ${username}!`, 'success');
+      } else {
+        showAuthError("Invalid username or password. Check default access credentials below.");
+      }
+    }
+
+    function showAuthError(msg) {
+      const alert = document.getElementById('auth-error-alert');
+      const text = document.getElementById('auth-error-text');
+      text.textContent = msg;
+      alert.classList.remove('hidden');
+      alert.classList.remove('animate-shake');
+      void alert.offsetWidth; // trigger reflow
+      alert.classList.add('animate-shake');
+    }
+
+    function togglePasswordVisibility() {
+      const pwd = document.getElementById('auth-password');
+      const icon = document.getElementById('password-toggle-icon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        pwd.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function fillDemoCredentials() {
+      document.getElementById('auth-username').value = 'admin';
+      document.getElementById('auth-password').value = 'leauum2025';
+      document.getElementById('auth-error-alert').classList.add('hidden');
+    }
+
+    function handleLogout() {
+      if (window.confirm("Are you sure you want to sign out from the ambassador dashboard?")) {
+        clearAuthSession();
+        const badge = document.getElementById('auth-user-badge');
+        if (badge) {
+          badge.classList.add('hidden');
+          badge.classList.remove('inline-flex');
+        }
+        showToast("Signed out successfully", "info");
+        document.getElementById('auth-form').reset();
+        showLoginModal();
+      }
+    }
+
+    // Initialize on window load (check authentication first)
     window.onload = function() {
-      initApp();
+      checkAuthSession();
     };
   </script>
 </body>

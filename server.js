@@ -145,6 +145,38 @@ function seedRecruits() {
 }
 
 // ==========================================
+// AUTHENTICATION ROUTES
+// ==========================================
+const VALID_CREDENTIALS = [
+    { username: 'admin', password: process.env.ADMIN_PASSWORD || 'leauum2025', role: 'Lead Ambassador' },
+    { username: 'ambassador', password: process.env.AMBASSADOR_PASSWORD || 'leauum2025', role: 'Campus Ambassador' }
+];
+
+// Authenticate ambassador login
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const user = VALID_CREDENTIALS.find(u =>
+        u.username.toLowerCase() === username.trim().toLowerCase() &&
+        u.password === password.trim()
+    );
+
+    if (user) {
+        const token = Buffer.from(`${user.username}:${Date.now()}`).toString('base64');
+        return res.json({
+            success: true,
+            token,
+            user: { username: user.username, role: user.role }
+        });
+    }
+
+    return res.status(401).json({ error: 'Invalid username or password' });
+});
+
+// ==========================================
 // PARTNER / OUTREACH ROUTES
 // ==========================================
 
