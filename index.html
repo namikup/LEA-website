@@ -143,7 +143,7 @@
 
         <!-- Action tools -->
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <button onclick="resetDataPrompt()" title="Reset default template data" class="px-3 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+          <button id="btn-reset-defaults" onclick="resetDataPrompt()" title="Reset default template data" class="px-3 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
             <i class="fa-solid fa-arrows-rotate"></i>
             <span class="hidden sm:inline">Reset Defaults</span>
           </button>
@@ -686,6 +686,12 @@
     }
 
     async function resetDataPrompt() {
+      const isAdmin = currentAuthUser && (currentAuthUser.role === 'Lead Ambassador' || currentAuthUser.username.toLowerCase() === 'admin');
+      if (!isAdmin) {
+        showToast("Access Restricted: Only Lead Ambassadors (Admin) can reset template data.", "warning");
+        return;
+      }
+
       if (window.confirm("Restore default preset UUM clubs and mock leads? All your custom changes will be reset.")) {
         if (isBackendConnected) {
           try {
@@ -1252,6 +1258,7 @@
     // AUTHENTICATION & SESSION MANAGEMENT
     // ==========================================
     const AUTH_STORAGE_KEY = 'lea_ambassador_auth_session';
+    let currentAuthUser = null;
 
     function checkAuthSession() {
       const session = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
@@ -1259,7 +1266,8 @@
         try {
           const authData = JSON.parse(session);
           if (authData && authData.username) {
-            showDashboard(authData.username);
+            currentAuthUser = authData;
+            showDashboard(authData.username, authData.role);
             initApp();
             return;
           }
@@ -1291,18 +1299,39 @@
       }, 300);
     }
 
-    function showDashboard(username) {
+    function showDashboard(username, role = '') {
       hideLoginModal();
       const badge = document.getElementById('auth-user-badge');
-      const nameEl = document.getElementById('auth-user-name');
-      if (badge && nameEl) {
-        nameEl.textContent = username;
+      const resetBtn = document.getElementById('btn-reset-defaults');
+      
+      const isAdmin = (role === 'Lead Ambassador' || username.toLowerCase() === 'admin');
+
+      if (badge) {
+        if (isAdmin) {
+          badge.className = 'hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-amber-50 text-amber-900 rounded-lg border border-amber-200 shadow-2xs';
+          badge.innerHTML = `<i class="fa-solid fa-crown text-amber-500"></i><span id="auth-user-name">${username}</span> <span class="text-[9px] bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Lead</span>`;
+          badge.title = 'Logged in as Lead Ambassador (Full Admin Access)';
+        } else {
+          badge.className = 'hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-slate-100 text-slate-700 rounded-lg border border-slate-200';
+          badge.innerHTML = `<i class="fa-solid fa-user-check text-brand-600"></i><span id="auth-user-name">${username}</span> <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Ambassador</span>`;
+          badge.title = 'Logged in as Campus Ambassador (Standard Access)';
+        }
         badge.classList.remove('hidden');
         badge.classList.add('inline-flex');
+      }
+
+      // Role-based action security: only Admin can see or use Reset Defaults
+      if (resetBtn) {
+        if (isAdmin) {
+          resetBtn.classList.remove('hidden');
+        } else {
+          resetBtn.classList.add('hidden');
+        }
       }
     }
 
     function clearAuthSession() {
+      currentAuthUser = null;
       localStorage.removeItem(AUTH_STORAGE_KEY);
       sessionStorage.removeItem(AUTH_STORAGE_KEY);
     }
@@ -1323,7 +1352,7 @@
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Verifying...</span>';
 
       let authenticated = false;
-      let role = 'Ambassador Admin';
+      let role = 'Campus Ambassador';
 
       // Send authentication request strictly to server API
       try {
@@ -1370,14 +1399,15 @@
           role,
           loginAt: new Date().toISOString()
         };
+        currentAuthUser = authPayload;
         if (rememberMe) {
           localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authPayload));
         } else {
           sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authPayload));
         }
-        showDashboard(username);
+        showDashboard(username, role);
         initApp();
-        showToast(`Welcome back, ${username}!`, 'success');
+        showToast(`Welcome back, ${username}! (${role})`, 'success');
       } else {
         showAuthError("Invalid username or password.");
       }
@@ -1411,9 +1441,13 @@
       if (window.confirm("Are you sure you want to sign out from the ambassador dashboard?")) {
         clearAuthSession();
         const badge = document.getElementById('auth-user-badge');
+        const resetBtn = document.getElementById('btn-reset-defaults');
         if (badge) {
           badge.classList.add('hidden');
           badge.classList.remove('inline-flex');
+        }
+        if (resetBtn) {
+          resetBtn.classList.add('hidden');
         }
         showToast("Signed out successfully", "info");
         document.getElementById('auth-form').reset();

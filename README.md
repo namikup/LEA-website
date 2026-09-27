@@ -140,10 +140,10 @@ The dashboard comes pre-seeded with real UUM entities and organizations:
 
 The dashboard uses server-side authentication. Passwords are **never stored in the frontend codebase** or committed to GitHub:
 
-| Role | Username Variable | Password Variable | Description |
+| Role | Username Variable | Password Variable | Permissions & Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Lead Ambassador / Admin** | `ADMIN_USERNAME` (default: `admin`) | `ADMIN_PASSWORD` | Full access to pipeline and stats |
-| **Campus Ambassador** | `AMBASSADOR_USERNAME` (default: `ambassador`) | `AMBASSADOR_PASSWORD` | Outreach and recruit tracking |
+| **Lead Ambassador / Admin** | `ADMIN_USERNAME` (default: `admin`) | `ADMIN_PASSWORD` | **Full Master Access**: Manage all pipelines, demographic KPIs, and database reset permissions (`👑 Lead`). |
+| **Campus Ambassador** | `AMBASSADOR_USERNAME` (default: `ambassador`) | `AMBASSADOR_PASSWORD` | **Operational Access**: Add/update recruitment leads, manage partner Kanban stages, and copy outreach pitches. Destructive reset actions are locked for safety (`👤 Ambassador`). |
 
 ### Setting Passwords on Render:
 1. Go to your [Render Dashboard](https://dashboard.render.com).
