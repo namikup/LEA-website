@@ -25,24 +25,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Seed defaults
+// Seed defaults (All fresh partner outreach starts at "Not Contacted")
 const DEFAULT_PARTNERS = [
-    { name: 'JKP INASIS TNB', category: 'INASIS', stage: 'Secured Free Booth', pic: 'Exco Hubungan Luar (@jkpinasistnb)', notes: 'Granted free booth during Inasis Week foyer activities.', booth_status: 'Secured' },
-    { name: 'JKP INASIS MAS', category: 'INASIS', stage: 'Negotiating Booth', pic: 'YDP / Biro Keusahawanan', notes: 'Discussing co-sharing booth at cafeteria walkway.', booth_status: 'Negotiating' },
-    { name: 'JKP INASIS Tradewinds', category: 'INASIS', stage: 'Pitch Sent', pic: 'Exco Kebajikan', notes: 'Sent BM proposal on financial literacy workshop.', booth_status: 'Pending' },
+    { name: 'JKP INASIS TNB', category: 'INASIS', stage: 'Not Contacted', pic: 'Exco Hubungan Luar (@jkpinasistnb)', notes: 'Granted free booth during Inasis Week foyer activities.', booth_status: 'Pending' },
+    { name: 'JKP INASIS MAS', category: 'INASIS', stage: 'Not Contacted', pic: 'YDP / Biro Keusahawanan', notes: 'Discussing co-sharing booth at cafeteria walkway.', booth_status: 'Pending' },
+    { name: 'JKP INASIS Tradewinds', category: 'INASIS', stage: 'Not Contacted', pic: 'Exco Kebajikan', notes: 'Sent BM proposal on financial literacy workshop.', booth_status: 'Pending' },
     { name: 'JKP INASIS Proton', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpinasisproton', notes: 'To find contact of Biro Luar.', booth_status: 'Pending' },
     { name: 'JKP INASIS Petronas', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpinasispetronas', notes: 'Waiting for academic calendar confirmation.', booth_status: 'Pending' },
-    { name: 'JKP INASIS Maybank', category: 'INASIS', stage: 'Pitch Sent', pic: 'YDP WhatsApp', notes: 'Follow-up set for Tuesday.', booth_status: 'Pending' },
+    { name: 'JKP INASIS Maybank', category: 'INASIS', stage: 'Not Contacted', pic: 'YDP WhatsApp', notes: 'Follow-up set for Tuesday.', booth_status: 'Pending' },
     { name: 'JKP INASIS Sime Darby', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpsimedarby', notes: 'Explore student hub lounge booth.', booth_status: 'Pending' },
-    { name: 'QUEST (Quantitative Science)', category: 'Academic', stage: 'Negotiating Booth', pic: 'VP External (@quest_uum)', notes: 'Exploring collaboration for financial modeling interest.', booth_status: 'Negotiating' },
-    { name: 'ECOSOC (School of Economics)', category: 'Academic', stage: 'Secured Free Booth', pic: 'Biro Akademik (@ecosocuum)', notes: 'Agreed to co-promote 23 June talk in return for supporting logo.', booth_status: 'Secured' },
-    { name: 'COMSAT (Computing Society)', category: 'Academic', stage: 'Pitch Sent', pic: 'Corporate Exco (@comsat_uum)', notes: 'Proposing fintech career workshop for IT majors.', booth_status: 'Pending' },
-    { name: 'MPP Representative (SEFB / COB)', category: 'Academic', stage: 'Pitch Sent', pic: 'MPP Kerusi COB', notes: 'Requesting permission to place banner in SEFB foyer.', booth_status: 'Pending' },
-    { name: 'PERMADA (Kelab Mahasiswa Kedah)', category: 'State Club', stage: 'Negotiating Booth', pic: 'YDP PERMADA', notes: 'Offered RM150 token sponsorship for their community night in return for a booth.', booth_status: 'Negotiating' },
-    { name: 'IKMAM (Ikatan Mahasiswa Melaka)', category: 'State Club', stage: 'Pitch Sent', pic: 'Setiausaha (@ikmam_uum)', notes: 'Pitch sent via WhatsApp.', booth_status: 'Pending' },
+    { name: 'QUEST (Quantitative Science)', category: 'Academic', stage: 'Not Contacted', pic: 'VP External (@quest_uum)', notes: 'Exploring collaboration for financial modeling interest.', booth_status: 'Pending' },
+    { name: 'ECOSOC (School of Economics)', category: 'Academic', stage: 'Not Contacted', pic: 'Biro Akademik (@ecosocuum)', notes: 'Agreed to co-promote 23 June talk in return for supporting logo.', booth_status: 'Pending' },
+    { name: 'COMSAT (Computing Society)', category: 'Academic', stage: 'Not Contacted', pic: 'Corporate Exco (@comsat_uum)', notes: 'Proposing fintech career workshop for IT majors.', booth_status: 'Pending' },
+    { name: 'MPP Representative (SEFB / COB)', category: 'Academic', stage: 'Not Contacted', pic: 'MPP Kerusi COB', notes: 'Requesting permission to place banner in SEFB foyer.', booth_status: 'Pending' },
+    { name: 'PERMADA (Kelab Mahasiswa Kedah)', category: 'State Club', stage: 'Not Contacted', pic: 'YDP PERMADA', notes: 'Offered RM150 token sponsorship for their community night in return for a booth.', booth_status: 'Pending' },
+    { name: 'IKMAM (Ikatan Mahasiswa Melaka)', category: 'State Club', stage: 'Not Contacted', pic: 'Setiausaha (@ikmam_uum)', notes: 'Pitch sent via WhatsApp.', booth_status: 'Pending' },
     { name: 'SEPERAK (Persatuan Anak Perak)', category: 'State Club', stage: 'Not Contacted', pic: '@seperak_uum', notes: 'Gather contact details from Inasis lounge.', booth_status: 'Pending' },
-    { name: 'Pesta Angpau UUM (UUMPAC)', category: 'Cultural', stage: 'Negotiating Booth', pic: 'Sponsorship Exco (@uumpac)', notes: 'High density Chinese audience. Looking at sponsorship package vs free info table.', booth_status: 'Negotiating' },
-    { name: 'Kelab Kebudayaan Tionghua (UUM CCC)', category: 'Cultural', stage: 'Secured Free Booth', pic: 'President CCC', notes: 'Co-hosting financial literacy teaser during gathering.', booth_status: 'Secured' }
+    { name: 'Pesta Angpau UUM (UUMPAC)', category: 'Cultural', stage: 'Not Contacted', pic: 'Sponsorship Exco (@uumpac)', notes: 'High density Chinese audience. Looking at sponsorship package vs free info table.', booth_status: 'Pending' },
+    { name: 'Kelab Kebudayaan Tionghua (UUM CCC)', category: 'Cultural', stage: 'Not Contacted', pic: 'President CCC', notes: 'Co-hosting financial literacy teaser during gathering.', booth_status: 'Pending' }
 ];
 
 const DEFAULT_LEADS = [
@@ -256,14 +256,15 @@ app.post('/api/partners', (req, res) => {
 
 // Update partner status or details
 app.put('/api/partners/:id', (req, res) => {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const cleanId = String(rawId).replace(/^p-/i, '');
     const { name, category, type, stage, status, pic, contact_person, contact, phone, booth_status, notes } = req.body;
 
     const cat = category || type;
     const stg = stage || status;
     const contactPerson = pic || contact_person;
     const cont = contact || phone;
-    const booth = booth_status || (stg === 'Secured Free Booth' ? 'Secured' : undefined);
+    const booth = booth_status || (stg === 'Secured Free Booth' ? 'Secured' : (stg === 'Negotiating Booth' ? 'Negotiating' : 'Pending'));
 
     const sql = `
         UPDATE partners 
@@ -279,19 +280,21 @@ app.put('/api/partners/:id', (req, res) => {
             booth_status = COALESCE(?, booth_status),
             notes = COALESCE(?, notes),
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
+        WHERE id = ? OR id = ?
     `;
-    db.run(sql, [name, cat, cat, stg, stg, contactPerson, contactPerson, cont, cont, booth, notes, id], function (err) {
+    db.run(sql, [name, cat, cat, stg, stg, contactPerson, contactPerson, cont, cont, booth, notes, cleanId, rawId], function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Partner updated successfully', id: Number(id), changes: this.changes });
+        res.json({ message: 'Partner updated successfully', id: Number(cleanId) || rawId, changes: this.changes });
     });
 });
 
 // Delete partner
 app.delete('/api/partners/:id', (req, res) => {
-    db.run('DELETE FROM partners WHERE id = ?', [req.params.id], function (err) {
+    const rawId = req.params.id;
+    const cleanId = String(rawId).replace(/^p-/i, '');
+    db.run('DELETE FROM partners WHERE id = ? OR id = ?', [cleanId, rawId], function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Partner deleted', id: req.params.id, changes: this.changes });
+        res.json({ message: 'Partner deleted', id: cleanId, changes: this.changes });
     });
 });
 
@@ -349,7 +352,8 @@ app.post('/api/recruits', (req, res) => {
 
 // Update recruit pipeline stage or details
 app.put('/api/recruits/:id', (req, res) => {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const cleanId = String(rawId).replace(/^l-/i, '');
     const { name, demo, ethnicity, faculty, year, inasis, source, contact, phone, status, stage, notes } = req.body;
 
     const eth = demo || ethnicity;
@@ -370,19 +374,21 @@ app.put('/api/recruits/:id', (req, res) => {
             status = COALESCE(?, status),
             stage = COALESCE(?, stage),
             notes = COALESCE(?, notes)
-        WHERE id = ?
+        WHERE id = ? OR id = ?
     `;
-    db.run(sql, [name, eth, eth, faculty, year, inasis, source, cont, cont, stg, stg, notes, id], function (err) {
+    db.run(sql, [name, eth, eth, faculty, year, inasis, source, cont, cont, stg, stg, notes, cleanId, rawId], function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Recruit updated', id: Number(id), changes: this.changes });
+        res.json({ message: 'Recruit updated', id: Number(cleanId) || rawId, changes: this.changes });
     });
 });
 
 // Delete recruit
 app.delete('/api/recruits/:id', (req, res) => {
-    db.run('DELETE FROM recruits WHERE id = ?', [req.params.id], function (err) {
+    const rawId = req.params.id;
+    const cleanId = String(rawId).replace(/^l-/i, '');
+    db.run('DELETE FROM recruits WHERE id = ? OR id = ?', [cleanId, rawId], function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Recruit deleted', id: req.params.id, changes: this.changes });
+        res.json({ message: 'Recruit deleted', id: cleanId, changes: this.changes });
     });
 });
 

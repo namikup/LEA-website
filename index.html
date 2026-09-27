@@ -582,31 +582,31 @@
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
   <script>
-    // Initial Default Seed Data for UUM specific tasks
+    // Initial Default Seed Data for UUM specific tasks (all fresh partner outreach starts at "Not Contacted")
     const DEFAULT_PARTNERS = [
       // INASIS JKPs
-      { id: 'p-1', name: 'JKP INASIS TNB', category: 'INASIS', stage: 'Secured Free Booth', pic: 'Exco Hubungan Luar (@jkpinasistnb)', notes: 'Granted free booth during Inasis Week foyer activities.' },
-      { id: 'p-2', name: 'JKP INASIS MAS', category: 'INASIS', stage: 'Negotiating Booth', pic: 'YDP / Biro Keusahawanan', notes: 'Discussing co-sharing booth at cafeteria walkway.' },
-      { id: 'p-3', name: 'JKP INASIS Tradewinds', category: 'INASIS', stage: 'Pitch Sent', pic: 'Exco Kebajikan', notes: 'Sent BM proposal on financial literacy workshop.' },
+      { id: 'p-1', name: 'JKP INASIS TNB', category: 'INASIS', stage: 'Not Contacted', pic: 'Exco Hubungan Luar (@jkpinasistnb)', notes: 'Granted free booth during Inasis Week foyer activities.' },
+      { id: 'p-2', name: 'JKP INASIS MAS', category: 'INASIS', stage: 'Not Contacted', pic: 'YDP / Biro Keusahawanan', notes: 'Discussing co-sharing booth at cafeteria walkway.' },
+      { id: 'p-3', name: 'JKP INASIS Tradewinds', category: 'INASIS', stage: 'Not Contacted', pic: 'Exco Kebajikan', notes: 'Sent BM proposal on financial literacy workshop.' },
       { id: 'p-4', name: 'JKP INASIS Proton', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpinasisproton', notes: 'To find contact of Biro Luar.' },
       { id: 'p-5', name: 'JKP INASIS Petronas', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpinasispetronas', notes: 'Waiting for academic calendar confirmation.' },
-      { id: 'p-6', name: 'JKP INASIS Maybank', category: 'INASIS', stage: 'Pitch Sent', pic: 'YDP WhatsApp', notes: 'Follow-up set for Tuesday.' },
+      { id: 'p-6', name: 'JKP INASIS Maybank', category: 'INASIS', stage: 'Not Contacted', pic: 'YDP WhatsApp', notes: 'Follow-up set for Tuesday.' },
       { id: 'p-7', name: 'JKP INASIS Sime Darby', category: 'INASIS', stage: 'Not Contacted', pic: '@jkpsimedarby', notes: 'Explore student hub lounge booth.' },
 
       // Academic & MPP
-      { id: 'p-8', name: 'QUEST (Quantitative Science)', category: 'Academic', stage: 'Negotiating Booth', pic: 'VP External (@quest_uum)', notes: 'Exploring collaboration for financial modeling interest.' },
-      { id: 'p-9', name: 'ECOSOC (School of Economics)', category: 'Academic', stage: 'Secured Free Booth', pic: 'Biro Akademik (@ecosocuum)', notes: 'Agreed to co-promote 23 June talk in return for supporting logo.' },
-      { id: 'p-10', name: 'COMSAT (Computing Society)', category: 'Academic', stage: 'Pitch Sent', pic: 'Corporate Exco (@comsat_uum)', notes: 'Proposing fintech career workshop for IT majors.' },
-      { id: 'p-11', name: 'MPP Representative (SEFB / COB)', category: 'Academic', stage: 'Pitch Sent', pic: 'MPP Kerusi COB', notes: 'Requesting permission to place banner in SEFB foyer.' },
+      { id: 'p-8', name: 'QUEST (Quantitative Science)', category: 'Academic', stage: 'Not Contacted', pic: 'VP External (@quest_uum)', notes: 'Exploring collaboration for financial modeling interest.' },
+      { id: 'p-9', name: 'ECOSOC (School of Economics)', category: 'Academic', stage: 'Not Contacted', pic: 'Biro Akademik (@ecosocuum)', notes: 'Agreed to co-promote 23 June talk in return for supporting logo.' },
+      { id: 'p-10', name: 'COMSAT (Computing Society)', category: 'Academic', stage: 'Not Contacted', pic: 'Corporate Exco (@comsat_uum)', notes: 'Proposing fintech career workshop for IT majors.' },
+      { id: 'p-11', name: 'MPP Representative (SEFB / COB)', category: 'Academic', stage: 'Not Contacted', pic: 'MPP Kerusi COB', notes: 'Requesting permission to place banner in SEFB foyer.' },
 
       // State Clubs
-      { id: 'p-12', name: 'PERMADA (Kelab Mahasiswa Kedah)', category: 'State Club', stage: 'Negotiating Booth', pic: 'YDP PERMADA', notes: 'Offered RM150 token sponsorship for their community night in return for a booth.' },
-      { id: 'p-13', name: 'IKMAM (Ikatan Mahasiswa Melaka)', category: 'State Club', stage: 'Pitch Sent', pic: 'Setiausaha (@ikmam_uum)', notes: 'Pitch sent via WhatsApp.' },
+      { id: 'p-12', name: 'PERMADA (Kelab Mahasiswa Kedah)', category: 'State Club', stage: 'Not Contacted', pic: 'YDP PERMADA', notes: 'Offered RM150 token sponsorship for their community night in return for a booth.' },
+      { id: 'p-13', name: 'IKMAM (Ikatan Mahasiswa Melaka)', category: 'State Club', stage: 'Not Contacted', pic: 'Setiausaha (@ikmam_uum)', notes: 'Pitch sent via WhatsApp.' },
       { id: 'p-14', name: 'SEPERAK (Persatuan Anak Perak)', category: 'State Club', stage: 'Not Contacted', pic: '@seperak_uum', notes: 'Gather contact details from Inasis lounge.' },
 
       // Cultural / Chinese
-      { id: 'p-15', name: 'Pesta Angpau UUM (UUMPAC)', category: 'Cultural', stage: 'Negotiating Booth', pic: 'Sponsorship Exco (@uumpac)', notes: 'High density Chinese audience. Looking at sponsorship package vs free info table.' },
-      { id: 'p-16', name: 'Kelab Kebudayaan Tionghua (UUM CCC)', category: 'Cultural', stage: 'Secured Free Booth', pic: 'President CCC', notes: 'Co-hosting financial literacy teaser during gathering.' }
+      { id: 'p-15', name: 'Pesta Angpau UUM (UUMPAC)', category: 'Cultural', stage: 'Not Contacted', pic: 'Sponsorship Exco (@uumpac)', notes: 'High density Chinese audience. Looking at sponsorship package vs free info table.' },
+      { id: 'p-16', name: 'Kelab Kebudayaan Tionghua (UUM CCC)', category: 'Cultural', stage: 'Not Contacted', pic: 'President CCC', notes: 'Co-hosting financial literacy teaser during gathering.' }
     ];
 
     const DEFAULT_LEADS = [
@@ -619,7 +619,7 @@
     ];
 
     // API endpoint configuration
-    const API_URL = (window.location.hostname === 'lea-website.onrender.com')
+    const API_URL = (window.location.hostname === 'lea-website.onrender.com' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? '/api'
       : 'https://lea-website.onrender.com/api';
 
@@ -1055,36 +1055,33 @@
           partners[index] = { ...partners[index], name, category, stage, pic, notes, booth_status };
           showToast(`Updated "${name}"`, 'success');
         }
-        if (isBackendConnected) {
-          try {
-            await fetch(`${API_URL}/partners/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
-            });
-          } catch (err) {
-            console.warn('API error updating partner:', err);
-          }
+        try {
+          fetch(`${API_URL}/partners/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
+          }).then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
       } else {
         let newPartner = {
           id: 'p-' + Date.now(),
           name, category, stage, pic, notes, booth_status
         };
-        if (isBackendConnected) {
-          try {
-            const res = await fetch(`${API_URL}/partners`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
-            });
-            if (res.ok) {
-              const created = await res.json();
-              newPartner.id = created.id;
-            }
-          } catch (err) {
-            console.warn('API error adding partner:', err);
+        try {
+          const res = await fetch(`${API_URL}/partners`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, category, stage, status: stage, pic, contact_person: pic, notes, booth_status })
+          });
+          if (res.ok) {
+            const created = await res.json();
+            newPartner.id = created.id;
+            updateBackendStatusBadge(true);
           }
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
         partners.unshift(newPartner);
         showToast(`Added "${name}" to pipeline`, 'success');
@@ -1109,16 +1106,14 @@
         renderPartners();
         showToast(`Moved ${p.name} to ${newStage}`, 'info');
 
-        if (isBackendConnected) {
-          try {
-            await fetch(`${API_URL}/partners/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ stage: newStage, status: newStage, booth_status: p.booth_status })
-            });
-          } catch (err) {
-            console.warn('API error updating partner stage:', err);
-          }
+        try {
+          fetch(`${API_URL}/partners/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage: newStage, status: newStage, booth_status: p.booth_status })
+          }).then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
       }
     }
@@ -1133,12 +1128,11 @@
       renderAll();
       showToast('Organization removed', 'info');
 
-      if (isBackendConnected) {
-        try {
-          await fetch(`${API_URL}/partners/${id}`, { method: 'DELETE' });
-        } catch (err) {
-          console.warn('API error deleting partner:', err);
-        }
+      try {
+        fetch(`${API_URL}/partners/${id}`, { method: 'DELETE' })
+          .then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+      } catch (err) {
+        console.warn('API sync warning:', err);
       }
     }
 
@@ -1198,36 +1192,33 @@
           leads[index] = { ...leads[index], name, demo, status, faculty, inasis, source, contact };
           showToast(`Updated ${name}`, 'success');
         }
-        if (isBackendConnected) {
-          try {
-            await fetch(`${API_URL}/recruits/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
-            });
-          } catch (err) {
-            console.warn('API error updating recruit:', err);
-          }
+        try {
+          fetch(`${API_URL}/recruits/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
+          }).then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
       } else {
         let newLead = {
           id: 'l-' + Date.now(),
           name, demo, status, faculty, inasis, source, contact
         };
-        if (isBackendConnected) {
-          try {
-            const res = await fetch(`${API_URL}/recruits`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
-            });
-            if (res.ok) {
-              const created = await res.json();
-              newLead.id = created.id;
-            }
-          } catch (err) {
-            console.warn('API error adding recruit:', err);
+        try {
+          const res = await fetch(`${API_URL}/recruits`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, demo, ethnicity: demo, status, stage: status, faculty, inasis, source, contact, phone: contact })
+          });
+          if (res.ok) {
+            const created = await res.json();
+            newLead.id = created.id;
+            updateBackendStatusBadge(true);
           }
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
         leads.unshift(newLead);
         showToast(`Added ${name} to tracker`, 'success');
@@ -1251,16 +1242,14 @@
         renderLeads();
         showToast(`${l.name} marked as ${newStatus}`, 'info');
 
-        if (isBackendConnected) {
-          try {
-            await fetch(`${API_URL}/recruits/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: newStatus, stage: newStatus })
-            });
-          } catch (err) {
-            console.warn('API error updating recruit status:', err);
-          }
+        try {
+          fetch(`${API_URL}/recruits/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus, stage: newStatus })
+          }).then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+        } catch (err) {
+          console.warn('API sync warning:', err);
         }
       }
     }
@@ -1275,12 +1264,11 @@
       renderAll();
       showToast('Student lead removed', 'info');
 
-      if (isBackendConnected) {
-        try {
-          await fetch(`${API_URL}/recruits/${id}`, { method: 'DELETE' });
-        } catch (err) {
-          console.warn('API error deleting recruit:', err);
-        }
+      try {
+        fetch(`${API_URL}/recruits/${id}`, { method: 'DELETE' })
+          .then(res => { if (res.ok) updateBackendStatusBadge(true); }).catch(() => {});
+      } catch (err) {
+        console.warn('API sync warning:', err);
       }
     }
 
