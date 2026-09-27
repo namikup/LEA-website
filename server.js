@@ -169,7 +169,21 @@ const VALID_CREDENTIALS = [
 // Authenticate ambassador login
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body || {};
-    if (!username || !password) {
+    if (!username) {
+        return res.status(400).json({ error: 'Username is required' });
+    }
+
+    // Support guest view-only access
+    if (username.trim().toLowerCase() === 'guest') {
+        const token = Buffer.from(`guest:${Date.now()}`).toString('base64');
+        return res.json({
+            success: true,
+            token,
+            user: { username: 'Guest', role: 'Guest' }
+        });
+    }
+
+    if (!password) {
         return res.status(400).json({ error: 'Username and password are required' });
     }
 

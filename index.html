@@ -1003,6 +1003,10 @@
     }
 
     function openOutreachModal() {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot add target organizations.", "warning");
+        return;
+      }
       document.getElementById('partner-form').reset();
       document.getElementById('partner-id').value = '';
       document.getElementById('modal-partner-title').textContent = 'Add Target Organization';
@@ -1014,6 +1018,10 @@
     }
 
     function editPartner(id) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot edit organization details.", "warning");
+        return;
+      }
       const p = partners.find(item => String(item.id) === String(id));
       if (!p) return;
       document.getElementById('partner-id').value = p.id;
@@ -1028,6 +1036,11 @@
 
     async function savePartner(e) {
       e.preventDefault();
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot modify partner data.", "warning");
+        closePartnerModal();
+        return;
+      }
       const id = document.getElementById('partner-id').value;
       const name = document.getElementById('partner-name').value.trim();
       const category = document.getElementById('partner-category').value;
@@ -1083,6 +1096,10 @@
     }
 
     async function updatePartnerStage(id, newStage) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot change pipeline stages.", "warning");
+        return;
+      }
       const p = partners.find(item => String(item.id) === String(id));
       if (p) {
         p.stage = newStage;
@@ -1107,6 +1124,10 @@
     }
 
     async function deletePartner(id) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot delete organizations.", "warning");
+        return;
+      }
       partners = partners.filter(item => String(item.id) !== String(id));
       saveToStorage();
       renderAll();
@@ -1122,6 +1143,10 @@
     }
 
     function openLeadModal() {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot add member leads.", "warning");
+        return;
+      }
       document.getElementById('lead-form').reset();
       document.getElementById('lead-id').value = '';
       document.getElementById('modal-lead-title').textContent = 'Add Student Lead';
@@ -1133,6 +1158,10 @@
     }
 
     function editLead(id) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot edit student details.", "warning");
+        return;
+      }
       const lead = leads.find(l => String(l.id) === String(id));
       if (!lead) return;
       document.getElementById('lead-id').value = lead.id;
@@ -1149,6 +1178,11 @@
 
     async function saveLead(e) {
       e.preventDefault();
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot modify member lead data.", "warning");
+        closeLeadModal();
+        return;
+      }
       const id = document.getElementById('lead-id').value;
       const name = document.getElementById('lead-name').value.trim();
       const demo = document.getElementById('lead-demo').value;
@@ -1205,6 +1239,10 @@
     }
 
     async function updateLeadStatus(id, newStatus) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot update member lead status.", "warning");
+        return;
+      }
       const l = leads.find(item => String(item.id) === String(id));
       if (l) {
         l.status = newStatus;
@@ -1228,6 +1266,10 @@
     }
 
     async function deleteLead(id) {
+      if (currentAuthUser && currentAuthUser.role === 'Guest') {
+        showToast("View-Only: Guests cannot delete member leads.", "warning");
+        return;
+      }
       leads = leads.filter(item => String(item.id) !== String(id));
       saveToStorage();
       renderAll();
@@ -1342,11 +1384,20 @@
       hideLoginModal();
       const badge = document.getElementById('auth-user-badge');
       const resetBtn = document.getElementById('btn-reset-defaults');
-      
+      const addLeadBtn = document.getElementById('btn-add-lead');
+      const addPartnerBtn = document.getElementById('btn-add-partner');
+      const guestBanner = document.getElementById('guest-notice-banner');
+      const thLeadActions = document.getElementById('th-lead-actions');
+
+      const isGuest = (role === 'Guest' || username.toLowerCase() === 'guest');
       const isAdmin = (role === 'Lead Ambassador' || username.toLowerCase() === 'admin');
 
       if (badge) {
-        if (isAdmin) {
+        if (isGuest) {
+          badge.className = 'hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-800 rounded-lg border border-indigo-200 shadow-2xs';
+          badge.innerHTML = `<i class="fa-solid fa-eye text-indigo-500"></i><span id="auth-user-name">${username}</span> <span class="text-[9px] bg-indigo-200/80 text-indigo-900 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">View Only</span>`;
+          badge.title = 'Browsing as Guest (View Only - No edit privileges)';
+        } else if (isAdmin) {
           badge.className = 'hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-amber-50 text-amber-900 rounded-lg border border-amber-200 shadow-2xs';
           badge.innerHTML = `<i class="fa-solid fa-crown text-amber-500"></i><span id="auth-user-name">${username}</span> <span class="text-[9px] bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Lead</span>`;
           badge.title = 'Logged in as Lead Ambassador (Full Admin Access)';
@@ -1359,7 +1410,16 @@
         badge.classList.add('inline-flex');
       }
 
-      // Role-based action security: only Admin can see or use Reset Defaults
+      // Guest notice banner
+      if (guestBanner) {
+        if (isGuest) {
+          guestBanner.classList.remove('hidden');
+        } else {
+          guestBanner.classList.add('hidden');
+        }
+      }
+
+      // Admin-only controls
       if (resetBtn) {
         if (isAdmin) {
           resetBtn.classList.remove('hidden');
@@ -1367,6 +1427,44 @@
           resetBtn.classList.add('hidden');
         }
       }
+
+      // Write-action controls (hidden for Guest)
+      if (addLeadBtn) {
+        if (isGuest) {
+          addLeadBtn.classList.add('hidden');
+        } else {
+          addLeadBtn.classList.remove('hidden');
+        }
+      }
+
+      if (addPartnerBtn) {
+        if (isGuest) {
+          addPartnerBtn.classList.add('hidden');
+        } else {
+          addPartnerBtn.classList.remove('hidden');
+        }
+      }
+
+      if (thLeadActions) {
+        if (isGuest) {
+          thLeadActions.classList.add('hidden');
+        } else {
+          thLeadActions.classList.remove('hidden');
+        }
+      }
+    }
+
+    function loginAsGuest() {
+      const guestPayload = {
+        username: 'Guest',
+        role: 'Guest',
+        loginAt: new Date().toISOString()
+      };
+      currentAuthUser = guestPayload;
+      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(guestPayload));
+      showDashboard('Guest', 'Guest');
+      initApp();
+      showToast("Welcome! You are browsing the Ambassador Hub in View-Only Guest mode.", "info");
     }
 
     function clearAuthSession() {
@@ -1481,13 +1579,21 @@
         clearAuthSession();
         const badge = document.getElementById('auth-user-badge');
         const resetBtn = document.getElementById('btn-reset-defaults');
+        const guestBanner = document.getElementById('guest-notice-banner');
+        const addLeadBtn = document.getElementById('btn-add-lead');
+        const addPartnerBtn = document.getElementById('btn-add-partner');
+        const thLeadActions = document.getElementById('th-lead-actions');
+
         if (badge) {
           badge.classList.add('hidden');
           badge.classList.remove('inline-flex');
         }
-        if (resetBtn) {
-          resetBtn.classList.add('hidden');
-        }
+        if (resetBtn) resetBtn.classList.add('hidden');
+        if (guestBanner) guestBanner.classList.add('hidden');
+        if (addLeadBtn) addLeadBtn.classList.remove('hidden');
+        if (addPartnerBtn) addPartnerBtn.classList.remove('hidden');
+        if (thLeadActions) thLeadActions.classList.remove('hidden');
+
         showToast("Signed out successfully", "info");
         document.getElementById('auth-form').reset();
         showLoginModal();

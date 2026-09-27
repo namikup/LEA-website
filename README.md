@@ -144,12 +144,13 @@ The dashboard uses server-side authentication. Passwords are **never stored in t
 | :--- | :--- | :--- | :--- |
 | **Lead Ambassador / Admin** | `ADMIN_USERNAME` (default: `admin`) | `ADMIN_PASSWORD` | **Full Master Access**: Manage all pipelines, demographic KPIs, and database reset permissions (`👑 Lead`). |
 | **Campus Ambassador** | `AMBASSADOR_USERNAME` (default: `ambassador`) | `AMBASSADOR_PASSWORD` | **Operational Access**: Add/update recruitment leads, manage partner Kanban stages, and copy outreach pitches. Destructive reset actions are locked for safety (`👤 Ambassador`). |
+| **Guest / Public Viewer** | *None required* | *None required* | **View-Only Access**: Instant access via the **"Explore as Guest (View Only)"** button. Can inspect live recruitment KPIs, partnership progress, and event scripts with all write/delete controls hidden (`👁️ View Only`). |
 
 ### Setting Passwords on Render:
 1. Go to your [Render Dashboard](https://dashboard.render.com).
 2. Select your `lea-website` service.
 3. Click **Environment** in the left sidebar.
-4. Add `ADMIN_PASSWORD` with your private secret password.
+4. Add `ADMIN_PASSWORD` and `AMBASSADOR_PASSWORD` with your private secret passwords.
 5. Save changes — Render will automatically re-deploy securely.
 
 ---
