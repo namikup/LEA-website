@@ -652,7 +652,7 @@
     async function checkBackendConnection() {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
         const res = await fetch(`${API_URL}/stats`, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (res.ok) {
@@ -1474,7 +1474,14 @@
       const password = passwordInput.value.trim();
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Verifying...</span>';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Verifying credentials...</span>';
+
+      // If cloud server is waking from sleep, notify the user so they know to wait
+      const wakeNoticeTimer = setTimeout(() => {
+        if (submitBtn.disabled) {
+          submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-fade"></i><span>Waking up cloud server (~15s)...</span>';
+        }
+      }, 3500);
 
       let authenticated = false;
       let role = 'Campus Ambassador';
@@ -1482,7 +1489,7 @@
       // Send authentication request strictly to server API
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s to handle Render free cold-starts
         const res = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1490,6 +1497,7 @@
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+        clearTimeout(wakeNoticeTimer);
 
         if (res.ok) {
           const data = await res.json();
@@ -1509,6 +1517,7 @@
           return;
         }
       } catch (err) {
+        clearTimeout(wakeNoticeTimer);
         showAuthError("Unable to reach authentication server. If the cloud service is waking up, please retry in a few seconds.");
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Sign In to Dashboard</span>';
@@ -1588,8 +1597,10 @@
       }
     }
 
-    // Initialize on window load (check authentication first)
+    // Initialize on window load (check authentication first and pre-warm cloud server)
     window.onload = function() {
+      // Pre-warm Render cloud server in background so it's awake before user clicks submit
+      try { fetch(`${API_URL}/stats`).catch(() => {}); } catch (e) {}
       checkAuthSession();
     };
   </script>
